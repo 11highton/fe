@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useTheme } from "@emotion/react";
 
 import HStack from "../components/core/HStack"
@@ -7,20 +7,26 @@ import Text from "../components/core/Text"
 import Icon from "../components/core/Icon"
 import Image from "../components/core/Image"
 import Input from "../components/core/Input"
+import useChat from "../../hooks/useChat"
 
 const Chat = () => {
     const theme = useTheme()
-    const [message, setMessage] = useState("")
-    const [response, setResponse] = useState("당신의 악몽을 들려주세요!")
+    const { message, setMessage, response, setResponse, generating, setGenerating, replStart, replMsg, replComplete, replCancel } = useChat()
 
-    const [generating, setGenerating] = useState(false)
+    useEffect(() => {
+        replStart()
+    }, [])
 
     return (
         <VStack w="100%" h="100%" align="c" bgColor={theme.colors.bgRegular}>
                 {generating ? (
                     <VStack w="100%" h="100%" maxw="480px" bgColor={theme.colors.bgWeak}>
                         <HStack w="100%" pv={14} ph={16} align="cl">
-                            <HStack p={4} gap={6} onClick={() => {setGenerating(false)}} cursor="pointer">
+                            <HStack p={4} gap={6} onClick={() => {
+                                replCancel()
+                                setMessage("")
+                                setResponse("")
+                                setGenerating(false)}} cursor="pointer">
                                 <Icon name={"back"} size={20} colors={[theme.colors.ctRegular]} />
                                 <Text value="생성 취소" font={theme.fonts.mm} color={theme.colors.ctRegular} /> 
                             </HStack>
@@ -37,7 +43,7 @@ const Chat = () => {
                             <HStack p={4} onClick={() => {}} cursor="pointer">
                                 <Icon name={"back"} size={20} colors={[theme.colors.ctRegular]} />
                             </HStack>
-                            <HStack p={4} onClick={() => {setGenerating(true)}} cursor="pointer">
+                            <HStack p={4} onClick={() => {replComplete(); setGenerating(true)}} cursor="pointer">
                                 <Text value="여기까지" font={theme.fonts.sl} color={theme.colors.ctRegular} />
                             </HStack>
                         </HStack>
@@ -61,8 +67,9 @@ const Chat = () => {
                                     hintColor={theme.colors.ctWeak}
                                     tabIdx={0}
                                     onInput={(value) => setMessage(value)}
+                                    onEnter={() => {replMsg(); setMessage("")}}
                                 />
-                                <HStack p={4} align="c" onClick={() => {}} cursor="pointer">
+                                <HStack p={4} align="c" onClick={() => {replMsg(); setMessage("")}} cursor="pointer">
                                     <Icon name={"send"} size={20} colors={[theme.colors.ctWeak]} />
                                 </HStack>
                             </HStack>

@@ -27,6 +27,7 @@ const Button = ({label, icon, variant = "fill", onClick}: ButtonProps) => {
                 variant === "outline" ? theme.colors.outline
                 : undefined }
             onClick={onClick}
+            cursor="pointer"
         >
             {icon}
             <Text value={label} font={theme.fonts.ms} color={

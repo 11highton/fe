@@ -34,5 +34,14 @@ export default defineConfig({
         setupFiles: ['.storybook/vitest.setup.ts']
       }
     }]
+  },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://172.20.10.4:8000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    }
   }
 });

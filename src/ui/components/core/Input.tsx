@@ -36,6 +36,7 @@ interface InputProps extends SizeProps, SpacingProps, ShapeProps, PositionProps,
   onInput?: (value: string) => void;
   onFocus?: () => void;
   onBlur?: () => void;
+  onEnter?: () => void;
 }
 
 const StyledInput = styled.input<InputProps>(
@@ -68,6 +69,7 @@ const Input = ({
   onInput,
   onFocus,
   onBlur,
+  onEnter,
   ...props
 }: InputProps) => {
   return (
@@ -87,6 +89,11 @@ const Input = ({
       onChange={(e) => onInput?.(e.target.value)}
       onFocus={onFocus}
       onBlur={onBlur}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          onEnter?.()
+        }
+      }}
       {...props}
     />
   );
