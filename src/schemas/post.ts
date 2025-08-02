@@ -1,6 +1,8 @@
 import z from "zod";
 import { user } from "./auth";
 
+export const audioStream = z.instanceof(Blob)
+
 export const Category = z.object({
     id: z.string(),
     name: z.string()

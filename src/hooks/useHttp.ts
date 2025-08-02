@@ -26,15 +26,17 @@ export interface ApiResponse<T = any> {
 export default class HttpService {
   private client: AxiosInstance;
   private static readonly DEFAULT_TIMEOUT = 600_000;
-  private static readonly DEFAULT_HEADERS = {
-    'Content-Type': 'application/json',
-  } as const;
 
-  constructor(baseURL = '/api') {
+  constructor(
+    baseURL = "/api",
+    contentType: string = "application/json",
+    responseType: "json" | "blob" | "arraybuffer" | "text" | "document" = "json"
+  ) {
     this.client = axios.create({
       baseURL,
       timeout: HttpService.DEFAULT_TIMEOUT,
-      headers: HttpService.DEFAULT_HEADERS,
+      headers: { 'Content-Type': contentType },
+      responseType,
       withCredentials: true,
     });
   }
