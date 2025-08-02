@@ -8,14 +8,43 @@ import Text from "../components/core/Text"
 import Icon from "../components/core/Icon"
 import Image from "../components/core/Image"
 import usePost from "../../hooks/usePost"
+import { useStreamingAudio } from "../../hooks/useAudio";
 
 const Post = () => {
     const { id } = useParams();
+    const { 
+        startRealTimeStreaming, 
+        timeline, 
+        setTimeline, 
+        play, 
+        setupEventListeners, 
+        cleanup, 
+        audioRef,
+        isPlaying,
+        pause,
+        stop
+    } = useStreamingAudio({})
     const theme = useTheme()
     const { title, setTitle, idx, setIdx, total, setTotal, script, setScript } = usePost(id!)
+    
+    useEffect(() => {
+        setupEventListeners()
+        return () => {
+            cleanup()
+        }
+    }, [])
+
+    useEffect(() => {
+        if (id) {
+            startRealTimeStreaming(`/audio/stream/${id}`)
+            setTimeline(0)
+            play()
+        }
+    }, [id])
 
     return (
         <VStack w="100%" h="100%" align="c" bgColor={theme.colors.bgRegular}>
+            <audio ref={audioRef} style={{ display: 'none' }}></audio>
             <VStack w="100%" h="100%" maxw="480px" bgColor={theme.colors.bgWeak}>
                 <HStack w="100%" pv={14} ph={20} gap={6} align="cl">
                     <Icon name="back" size={24} colors={[theme.colors.ctRegular]} />
@@ -30,13 +59,13 @@ const Post = () => {
                     <Text value={script[idx]} font={theme.fonts.lm} color={theme.colors.ctStrong} /> 
                 </VStack>
                 <HStack w="100%" pv={28} gap={40} align="c">
-                    <HStack align="c" p={18} r={32} olColor={theme.colors.outline} onClick={() => {if (idx > 1) setIdx(idx - 1)}} cursor="pointer">
+                    <HStack align="c" p={18} r={32} olColor={theme.colors.outline} onClick={() => {if (idx > 1) setIdx(idx - 1); stop()}} cursor="pointer">
                         <Icon name={"prev"} size={20} colors={[theme.colors.ctRegular]} />
                     </HStack>
-                    <HStack align="c" p={18} r={32} olColor={theme.colors.outline} onClick={() => {}} cursor="pointer">
-                        <Icon name={"pause"} size={20} colors={[theme.colors.ctRegular]} />
+                    <HStack align="c" p={18} r={32} olColor={theme.colors.outline} onClick={() => {if (isPlaying) {pause()} else {play()}}} cursor="pointer">
+                        <Icon name={isPlaying ? "pause" : "play"} size={20} colors={[theme.colors.ctRegular]} />
                     </HStack>
-                    <HStack align="c" p={18} r={32} olColor={theme.colors.outline} onClick={() => {if (idx < total) setIdx(idx + 1)}} cursor="pointer">
+                    <HStack align="c" p={18} r={32} olColor={theme.colors.outline} onClick={() => {if (idx < total) setIdx(idx + 1);}} cursor="pointer">
                         <Icon name={"next"} size={20} colors={[theme.colors.ctRegular]} />
                     </HStack>
                 </HStack>
