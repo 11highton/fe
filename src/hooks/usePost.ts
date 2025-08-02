@@ -18,9 +18,6 @@ const usePost = (id: string) => {
             setScript(data.contents.map((content: Content) => content.text))
         }
     }
-    const getAudio = async () => {
-        const { data } = await http.get(`/audio/stream/${id}`, )
-    }
 
     return {
         title,
@@ -30,7 +27,8 @@ const usePost = (id: string) => {
         total,
         setTotal,
         script,
-        setScript
+        setScript,
+        getPost
     }
 }
 

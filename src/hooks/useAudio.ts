@@ -13,14 +13,18 @@ interface UseStreamingAudioReturn {
   isLoading: boolean;
   isPlaying: boolean;
   error: string | null;
+  timeline: number;
+  isMuted: boolean;
+  volume: number;
   startStreaming: (url: string, config?: AxiosRequestConfig) => Promise<void>;
   startStreamingByPostId: (postId: string, config?: AxiosRequestConfig) => Promise<void>;
   startRealTimeStreaming: (url: string, config?: AxiosRequestConfig) => Promise<void>;
-  timeline: number;
-  setTimeline: (timeline: number) => void;
   play: () => void;
   pause: () => void;
   stop: () => void;
+  setTimeline: (timeline: number) => void;
+  setIsMuted: (isMuted: boolean) => void;
+  setVolume: (volume: number) => void;
   setupEventListeners: () => void;
   cleanup: () => void;
 }
@@ -225,6 +229,8 @@ export const useStreamingAudio = (options: UseStreamingAudioOptions = {}): UseSt
     audioRef,
     isLoading,
     isPlaying,
+    isMuted,
+    volume,
     error,
     startStreaming,
     startStreamingByPostId, // postId로 직접 스트리밍

@@ -25,9 +25,10 @@ const Post = () => {
         stop
     } = useStreamingAudio({})
     const theme = useTheme()
-    const { title, setTitle, idx, setIdx, total, setTotal, script, setScript } = usePost(id!)
+    const { title, setTitle, idx, setIdx, total, setTotal, script, setScript, getPost } = usePost(id!)
     
     useEffect(() => {
+        getPost()
         setupEventListeners()
         return () => {
             cleanup()
