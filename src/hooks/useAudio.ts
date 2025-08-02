@@ -23,7 +23,7 @@ interface UseStreamingAudioReturn {
   pause: () => void;
   stop: () => void;
   setTimeline: (timeline: number) => void;
-  setIsMuted: (isMuted: boolean) => void;
+  setMuted: (isMuted: boolean) => void;
   setVolume: (volume: number) => void;
   setupEventListeners: () => void;
   cleanup: () => void;
@@ -36,6 +36,8 @@ export const useStreamingAudio = (options: UseStreamingAudioOptions = {}): UseSt
   const [error, setError] = useState<string | null>(null);
   const currentSourceRef = useRef<string | null>(null);
   const [timeline, setTimeline] = useState(0);
+  const [isMuted, setIsMuted] = useState(false);
+  const [volume, setStVolume] = useState(1);
 
   const startStreaming = useCallback(async (url: string, config: AxiosRequestConfig = {}) => {
     if (!audioRef.current) {
@@ -194,6 +196,20 @@ export const useStreamingAudio = (options: UseStreamingAudioOptions = {}): UseSt
     }
   }, []);
 
+  const setMuted = useCallback((isMuted: boolean) => {
+    if (audioRef.current) {
+      audioRef.current.muted = isMuted;
+      setIsMuted(isMuted);
+    }
+  }, []);
+
+  const setVolume = useCallback((volume: number) => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+      setStVolume(volume);
+    }
+  }, []);
+
   // audio element 이벤트 리스너 설정
   const setupEventListeners = useCallback(() => {
     const audio = audioRef.current;
@@ -232,14 +248,16 @@ export const useStreamingAudio = (options: UseStreamingAudioOptions = {}): UseSt
     isMuted,
     volume,
     error,
+    timeline,
     startStreaming,
     startStreamingByPostId, // postId로 직접 스트리밍
     startRealTimeStreaming, // 실시간 스트리밍용
     play,
     pause,
     stop,
-    timeline,
     setTimeline,
+    setMuted,
+    setVolume,
     setupEventListeners,
     cleanup,
   };
