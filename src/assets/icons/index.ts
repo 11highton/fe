@@ -1,2 +1,6 @@
 export * from "./add"
 export * from "./notification"
+export * from "./dir"
+export * from "./send"
+export * from "./volume"
+export * from "./media"

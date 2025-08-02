@@ -17,7 +17,7 @@ import {
   parseFont,
 } from "../../../utils/parseStyles";
 
-interface TextInputProps extends SizeProps, SpacingProps, ShapeProps, PositionProps, DisplayProps {
+interface InputProps extends SizeProps, SpacingProps, ShapeProps, PositionProps, DisplayProps {
   value: string;
   hint?: string;
   type?: "text" | "number" | "email" | "search" | "password";
@@ -38,7 +38,7 @@ interface TextInputProps extends SizeProps, SpacingProps, ShapeProps, PositionPr
   onBlur?: () => void;
 }
 
-const StyledInput = styled.input<TextInputProps>(
+const StyledInput = styled.input<InputProps>(
   parseSize,
   parseSpacing,
   parseShape,
@@ -52,7 +52,7 @@ const StyledInput = styled.input<TextInputProps>(
   }),
 );
 
-const TextInput = ({
+const Input = ({
   value,
   hint,
   type = "text",
@@ -69,7 +69,7 @@ const TextInput = ({
   onFocus,
   onBlur,
   ...props
-}: TextInputProps) => {
+}: InputProps) => {
   return (
     <StyledInput
       tabIndex={tabIdx}
@@ -92,4 +92,4 @@ const TextInput = ({
   );
 };
 
-export default TextInput;
+export default Input;

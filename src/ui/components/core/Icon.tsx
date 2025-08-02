@@ -15,7 +15,7 @@ const Icon = ({ name, size, colors = [] }: IconProps) => {
       aria-label={name}
       width={size}
       height={size}
-      viewBox="0 0 24 24"
+      viewBox="0 0 20 20"
     >
       {paths.map((d, i) => (
         <path key={i} d={d} fill={colors[i] ?? "currentColor"} />
