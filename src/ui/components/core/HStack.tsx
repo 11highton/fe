@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import { motion } from "framer-motion"
 import type {
     SizeProps,
     SpacingProps,
@@ -27,7 +28,7 @@ interface HStackProps extends SizeProps, SpacingProps, ShapeProps, LayoutProps, 
     onClick?: () => void;
 }
 
-const StyledHStack = styled.div<HStackProps>(
+const StyledHStack = styled(motion.div)<HStackProps>(
     parseSize,
     parseSpacing,
     parseShape,
