@@ -14,10 +14,6 @@ const Post = () => {
     const theme = useTheme()
     const { title, setTitle, idx, setIdx, total, setTotal, script, setScript } = usePost(id!)
 
-    useEffect(() => {
-        getPost()
-    }, [])
-
     return (
         <VStack w="100%" h="100%" align="c" bgColor={theme.colors.bgRegular}>
             <VStack w="100%" h="100%" maxw="480px" bgColor={theme.colors.bgWeak}>
