@@ -1,149 +1,240 @@
-export interface IAudioHandlers {
-    onDeviceChange?: () => void;
-    onError?: (error: Error) => void;
-    onConnect?: () => void;
-    onDisconnect?: () => void;
-    onStreamChange?: (stream: MediaStream) => void;
-    onCapabilitiesChange?: (capabilities: MediaTrackCapabilities) => void;
-    
-    onPlay?: () => void;
-    onPause?: () => void;
-    onEnded?: () => void;
-    
-    onVolumeChange?: (volume: number) => void;
-    onMuteChange?: (isMuted: boolean) => void;
-    
-    onOutputDeviceChange?: (deviceId: string) => void;
+import { useRef, useCallback, useState } from 'react';
+import axios, { type AxiosRequestConfig } from 'axios';
+
+interface UseStreamingAudioOptions {
+  onLoadStart?: () => void;
+  onCanPlay?: () => void;
+  onError?: (error: Error) => void;
+  onEnded?: () => void;
 }
 
-export default class AudioService {
-  private readonly elementHandlers = new Map<HTMLMediaElement, { handlers: Partial<IAudioHandlers>; cleanup: () => void }>();
-  private readonly deviceChangeListeners = new Set<() => void>();
+interface UseStreamingAudioReturn {
+  audioRef: React.RefObject<HTMLAudioElement | null>;
+  isLoading: boolean;
+  isPlaying: boolean;
+  error: string | null;
+  startStreaming: (url: string, config?: AxiosRequestConfig) => Promise<void>;
+  startStreamingByPostId: (postId: string, config?: AxiosRequestConfig) => Promise<void>;
+  startRealTimeStreaming: (url: string, config?: AxiosRequestConfig) => Promise<void>;
+  timeline: number;
+  setTimeline: (timeline: number) => void;
+  play: () => void;
+  pause: () => void;
+  stop: () => void;
+  setupEventListeners: () => void;
+  cleanup: () => void;
+}
 
-  constructor() {
-    if (navigator.mediaDevices) {
-      if ('addEventListener' in navigator.mediaDevices) {
-        navigator.mediaDevices.addEventListener('devicechange', this.handleDeviceChange);
+export const useStreamingAudio = (options: UseStreamingAudioOptions = {}): UseStreamingAudioReturn => {
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const currentSourceRef = useRef<string | null>(null);
+  const [timeline, setTimeline] = useState(0);
+
+  const startStreaming = useCallback(async (url: string, config: AxiosRequestConfig = {}) => {
+    if (!audioRef.current) {
+      throw new Error('Audio element not found');
+    }
+
+    setIsLoading(true);
+    setError(null);
+    options.onLoadStart?.();
+
+    try {
+      // 이전 소스 정리
+      if (currentSourceRef.current) {
+        URL.revokeObjectURL(currentSourceRef.current);
+        currentSourceRef.current = null;
       }
-      navigator.mediaDevices.ondevicechange = this.handleDeviceChange;
+
+      // axios로 스트림 요청 (브라우저에서는 responseType을 'blob'으로 사용)
+      const response = await axios({
+        ...config,
+        url,
+        method: 'GET',
+        responseType: 'blob', // 브라우저에서는 blob 사용
+        headers: {
+          'Accept': 'audio/mpeg',
+          'Range': 'bytes=0-', // Range 헤더 추가
+          ...config.headers,
+        },
+      });
+
+      // Blob을 Object URL로 변환
+      const blob = response.data;
+      const audioUrl = URL.createObjectURL(blob);
+      
+      // audio element에 소스 설정
+      audioRef.current.src = audioUrl;
+      currentSourceRef.current = audioUrl;
+      
+      setIsLoading(false);
+      options.onCanPlay?.();
+
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load audio stream';
+      setError(errorMessage);
+      setIsLoading(false);
+      options.onError?.(new Error(errorMessage));
     }
-  }
+  }, [options]);
 
-  async listOutputs(): Promise<MediaDeviceInfo[]> {
-    const devices = await navigator.mediaDevices.enumerateDevices();
-    return devices.filter((d) => d.kind === 'audiooutput');
-  }
+  // postId로 직접 스트리밍하는 편의 메서드
+  const startStreamingByPostId = useCallback(async (postId: string, config: AxiosRequestConfig = {}) => {
+    const streamUrl = `/audio/stream/${postId}`;
+    return startStreaming(streamUrl, config);
+  }, [startStreaming]);
 
-  async getStream(
-    element: HTMLMediaElement,
-    deviceId?: string,
-    handlers: Partial<IAudioHandlers> = {}
-  ): Promise<MediaStream> {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-
-    if (deviceId) await this.setOutputDevice(element, deviceId);
-
-    this.registerElement(element, handlers);
-    handlers.onStreamChange?.(stream);
-    handlers.onConnect?.();
-
-    element.srcObject = stream;
-    return stream;
-  }
-
-  stopStream(stream: MediaStream): void {
-    stream.getTracks().forEach((t) => t.stop());
-  }
-
-  async setOutputDevice(element: HTMLMediaElement, deviceId: string): Promise<void> {
-    if ('setSinkId' in element) {
-      await (element as any).setSinkId(deviceId);
-      this.elementHandlers.get(element)?.handlers.onOutputDeviceChange?.(deviceId);
-    } else {
-      console.warn('오디오 장치 선택을 지원하지 않는 브라우저입니다.');
+  // 실시간 스트리밍용 (MediaSource API 사용)
+  const startRealTimeStreaming = useCallback(async (url: string, config: AxiosRequestConfig = {}) => {
+    if (!audioRef.current) {
+      throw new Error('Audio element not found');
     }
-  }
 
-  async play(element: HTMLMediaElement): Promise<void> {
-    await element.play();
-    this.elementHandlers.get(element)?.handlers.onPlay?.();
-  }
+    if (!MediaSource.isTypeSupported('audio/mpeg')) {
+      throw new Error('MediaSource not supported for audio/mpeg');
+    }
 
-  pause(element: HTMLMediaElement): void {
-    element.pause();
-    this.elementHandlers.get(element)?.handlers.onPause?.();
-  }
+    setIsLoading(true);
+    setError(null);
+    options.onLoadStart?.();
 
-  stop(element: HTMLMediaElement): void {
-    element.pause();
-    element.currentTime = 0;
-    this.elementHandlers.get(element)?.handlers.onEnded?.();
-  }
+    try {
+      const mediaSource = new MediaSource();
+      const objectUrl = URL.createObjectURL(mediaSource);
+      
+      if (currentSourceRef.current) {
+        URL.revokeObjectURL(currentSourceRef.current);
+      }
+      
+      audioRef.current.src = objectUrl;
+      currentSourceRef.current = objectUrl;
 
-  getVolume(element: HTMLMediaElement): number {
-    return element.volume;
-  }
+      mediaSource.addEventListener('sourceopen', async () => {
+        const sourceBuffer = mediaSource.addSourceBuffer('audio/mpeg');
+        
+        const response = await axios({
+          ...config,
+          url,
+          method: 'GET',
+          responseType: 'stream',
+          headers: {
+            'Accept': 'audio/*',
+            ...config.headers,
+          },
+        });
 
-  setVolume(element: HTMLMediaElement, volume: number): void {
-    element.volume = Math.max(0, Math.min(1, volume));
-    this.elementHandlers.get(element)?.handlers.onVolumeChange?.(element.volume);
-  }
+        const reader = response.data.getReader();
 
-  isMuted(element: HTMLMediaElement): boolean {
-    return element.muted;
-  }
+        const pump = async (): Promise<void> => {
+          const { done, value } = await reader.read();
+          
+          if (done) {
+            if (mediaSource.readyState === 'open') {
+              mediaSource.endOfStream();
+            }
+            setIsLoading(false);
+            return;
+          }
 
-  setMuted(element: HTMLMediaElement, muted: boolean): void {
-    element.muted = muted;
-    this.elementHandlers.get(element)?.handlers.onMuteChange?.(muted);
-  }
+          if (sourceBuffer.updating) {
+            await new Promise(resolve => {
+              sourceBuffer.addEventListener('updateend', resolve, { once: true });
+            });
+          }
 
-  async getCapabilities(constraints?: MediaTrackConstraints): Promise<MediaTrackCapabilities | null> {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: constraints || true });
-    const [track] = stream.getAudioTracks();
-    const caps = track?.getCapabilities ? track.getCapabilities() : null;
-    track.stop();
-    return caps;
-  }
+          try {
+            sourceBuffer.appendBuffer(value);
+            await pump();
+          } catch (err) {
+            console.error('Error appending buffer:', err);
+            setError('Error during streaming');
+            setIsLoading(false);
+          }
+        };
 
-  onDeviceChange(callback: () => void): () => void {
-    this.deviceChangeListeners.add(callback);
-    return () => this.deviceChangeListeners.delete(callback);
-  }
+        await pump();
+      });
 
-  private handleDeviceChange = (): void => {
-    this.deviceChangeListeners.forEach((cb) => cb());
-    this.elementHandlers.forEach(({ handlers }) => handlers.onDeviceChange?.());
+      options.onCanPlay?.();
+
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to start real-time streaming';
+      setError(errorMessage);
+      setIsLoading(false);
+      options.onError?.(new Error(errorMessage));
+    }
+  }, [options]);
+
+  const play = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.play();
+      setIsPlaying(true);
+    }
+  }, []);
+
+  const pause = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    }
+  }, []);
+
+  const stop = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      setIsPlaying(false);
+    }
+  }, []);
+
+  // audio element 이벤트 리스너 설정
+  const setupEventListeners = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+    const handleEnded = () => {
+      setIsPlaying(false);
+      options.onEnded?.();
+    };
+
+    audio.addEventListener('play', handlePlay);
+    audio.addEventListener('pause', handlePause);
+    audio.addEventListener('ended', handleEnded);
+
+    return () => {
+      audio.removeEventListener('play', handlePlay);
+      audio.removeEventListener('pause', handlePause);
+      audio.removeEventListener('ended', handleEnded);
+    };
+  }, [options]);
+
+  // cleanup
+  const cleanup = useCallback(() => {
+    if (currentSourceRef.current) {
+      URL.revokeObjectURL(currentSourceRef.current);
+      currentSourceRef.current = null;
+    }
+  }, []);
+
+  return {
+    audioRef,
+    isLoading,
+    isPlaying,
+    error,
+    startStreaming,
+    startStreamingByPostId, // postId로 직접 스트리밍
+    startRealTimeStreaming, // 실시간 스트리밍용
+    play,
+    pause,
+    stop,
+    timeline,
+    setTimeline,
+    setupEventListeners,
+    cleanup,
   };
-
-  private registerElement(element: HTMLMediaElement, handlers: Partial<IAudioHandlers>): void {
-    this.dispose(element);
-
-    const onPlay = () => handlers.onPlay?.();
-    const onPause = () => handlers.onPause?.();
-    const onEnded = () => handlers.onEnded?.();
-    const onVolumeChange = () => {
-      handlers.onVolumeChange?.(element.volume);
-      handlers.onMuteChange?.(element.muted);
-    };
-
-    element.addEventListener('play', onPlay);
-    element.addEventListener('pause', onPause);
-    element.addEventListener('ended', onEnded);
-    element.addEventListener('volumechange', onVolumeChange);
-
-    const _cleanup = () => {
-      element.removeEventListener('play', onPlay);
-      element.removeEventListener('pause', onPause);
-      element.removeEventListener('ended', onEnded);
-      element.removeEventListener('volumechange', onVolumeChange);
-    };
-
-    this.elementHandlers.set(element, { handlers, cleanup: _cleanup });
-  }
-
-  dispose(element: HTMLMediaElement): void {
-    this.elementHandlers.get(element)?.cleanup();
-    this.elementHandlers.delete(element);
-  }
-}
+};
