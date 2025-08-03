@@ -13,12 +13,12 @@ import useHome from "../../hooks/useHome";
 const Home = () => {
     const theme = useTheme()
     const navigate = useNavigate()
-    const { posts, setPosts, name, setName } = useHome()
+    const { posts, setPosts, me, setMe } = useHome()
 
     return (
         <VStack w="100%" h="100%" align="c" bgColor={theme.colors.bgRegular}>
             <VStack w="100%" h="100%" maxw="480px" p={20} bgColor={theme.colors.bgWeak} pos="rel">
-                <Text value={`안녕하세요 ${name}님!`} font={theme.fonts.lm} color={theme.colors.ctStrong}/>
+                <Text value={`안녕하세요 ${me?.name}님!`} font={theme.fonts.lm} color={theme.colors.ctStrong}/>
                 <Text value="오늘은 어떤 꿈을 꾸셨나요?" font={theme.fonts.lm} color={theme.colors.ctStrong}/>
                 <VStack w="100%" pv={40} align="c">
                     <Image w="50%" src="/rabbit_side.png" alt="rabbit" />
