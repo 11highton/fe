@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
 import { motion } from "framer-motion"
+import type { TargetAndTransition, Variants, Transition } from "framer-motion"
 import type {
     SizeProps,
     SpacingProps,
@@ -26,6 +27,15 @@ interface VStackProps extends SizeProps, SpacingProps, ShapeProps, LayoutProps, 
 
     tabIdx?: number;
     onClick?: () => void;
+
+    initial?: TargetAndTransition;
+    animate?: TargetAndTransition;
+    exit?: TargetAndTransition;
+    whileHover?: TargetAndTransition;
+    whileTap?: TargetAndTransition;
+    whileDrag?: TargetAndTransition;
+    variants?: Variants;
+    transition?: Transition;
 }
 
 const StyledVStack = styled(motion.div)<VStackProps>(
