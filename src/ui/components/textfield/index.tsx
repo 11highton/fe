@@ -3,6 +3,7 @@ import Input from "../core/Input"
 import { useTheme } from "@emotion/react"
 
 interface TextFieldProps {
+    type?: "text" | "number" | "email" | "search" | "password";
     w?: string;
     h?: string;
     value: string;
@@ -11,11 +12,12 @@ interface TextFieldProps {
     onEnter?: () => void;
 }
 
-const TextField = ({ w, h, value, hint, setValue, onEnter }: TextFieldProps) => {
+const TextField = ({ type = "text", w, h, value, hint, setValue, onEnter }: TextFieldProps) => {
     const theme = useTheme()
 
     return (
         <Input
+            type={type}
             w={w}
             h={h}
             ph={16}

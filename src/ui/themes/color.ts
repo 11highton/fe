@@ -16,7 +16,7 @@ export const lightColors: Colors = {
     ctInverted: "#FFFFFFFF",
     ctElevated: "#FFFFFFFF",
 
-    primary: "#007AFFFF",
+    primary: "#FFC933FF",
     success: "#34C759FF",
     warning: "#FFCC00FF",
     danger: "#FF3B30FF",
@@ -41,7 +41,7 @@ export const darkColors: Colors = {
     ctInverted: "#26262BFF",
     ctElevated: "#FFFFFFFF",
 
-    primary: "#0A84FFFF",
+    primary: "#F4BE2AFF",
     success: "#30D158FF",
     warning: "#FFD60AFF",
     danger: "#FF453AFF",

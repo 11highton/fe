@@ -1,4 +1,5 @@
 import { useTheme } from "@emotion/react";
+import { useNavigate } from "react-router-dom";
 
 import HStack from "../components/core/HStack"
 import VStack from "../components/core/VStack"
@@ -9,6 +10,7 @@ import TextBox from "../components/textbox"
 
 const Splash = () => {
     const theme = useTheme()
+    const navigate = useNavigate()
 
     return (
         <VStack w="100%" h="100%" align="c" bgColor={theme.colors.bgRegular}>
@@ -21,8 +23,8 @@ const Splash = () => {
                     <VStack w="100%" align="tr"><TextBox value="💡 내 꿈의 의미가 궁금해" /></VStack>
                     <VStack w="100%" align="c"><TextBox value="💭 다른 사람들은 어떤 꿈을 꿀까?" /></VStack>
                 </VStack>
-                <Button w="100%" label="완료" onClick={() => {}}/>
-                <HStack p={6} onClick={() => {}} cursor="pointer">
+                <Button w="100%" label="로그인" onClick={() => navigate('/login')}/>
+                <HStack p={6} onClick={() => navigate('/signup')} cursor="pointer">
                     <Text value="회원가입하기" font={theme.fonts.sm} color={theme.colors.ctRegular} />
                 </HStack>
             </VStack>

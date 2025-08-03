@@ -54,7 +54,7 @@ export interface LayoutProps {
 export interface PositionProps {
     pos?: "rel" | "abs" | "fix" | "stk";
     t?: number;
-    r?: number;
+    rr?: number;
     b?: number;
     l?: number;
     zIdx?: number;

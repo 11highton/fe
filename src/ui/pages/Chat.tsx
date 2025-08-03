@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { useTheme } from "@emotion/react";
+import { useNavigate } from "react-router-dom";
 
 import HStack from "../components/core/HStack"
 import VStack from "../components/core/VStack"
@@ -12,6 +13,7 @@ import { AnimatePresence } from "framer-motion";
 
 const Chat = () => {
     const theme = useTheme()
+    const navigate = useNavigate()
     const { message, setMessage, response, setResponse, generating, setGenerating, loading, setLoading, replStart, replMsg, replComplete, replCancel } = useChat()
 
     useEffect(() => {
@@ -42,7 +44,7 @@ const Chat = () => {
                 ) : (
                     <VStack initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ stiffness: 400 }} w="100%" h="100%" maxw="480px" bgColor={theme.colors.bgWeak}>
                         <HStack w="100%" pv={10} ph={16} gap="auto" align="c">
-                            <HStack p={4} onClick={() => {}} cursor="pointer">
+                            <HStack p={4} onClick={() => {navigate(-1)}} cursor="pointer">
                                 <Icon name={"back"} size={20} colors={[theme.colors.ctRegular]} />
                             </HStack>
                             <HStack p={4} onClick={() => {replComplete(); setGenerating(true)}} cursor="pointer"

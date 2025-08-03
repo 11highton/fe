@@ -1,13 +1,22 @@
+import { useState } from "react";
 import { useTheme } from "@emotion/react";
+import { useNavigate } from "react-router-dom";
 
 import HStack from "../components/core/HStack"
 import VStack from "../components/core/VStack"
 import Text from "../components/core/Text"
 import TextField from "../components/textfield"
 import Button from "../components/button"
+import HttpService from "../../hooks/useHttp";
 
 const Signup = () => {
+    const http = new HttpService()
     const theme = useTheme()
+    const navigate = useNavigate()
+
+    const [email, setEmail] = useState("")
+    const [password, setPassword] = useState("")
+    const [passwordConfirm, setPasswordConfirm] = useState("")
 
     return (
         <VStack w="100%" h="100%" align="c" bgColor={theme.colors.bgRegular}>
@@ -18,28 +27,37 @@ const Signup = () => {
                 </VStack>
                 <TextField
                     w="100%"
-                    value=""
+                    value={email}
                     hint="아이디 입력"
-                    setValue={() => {}}
+                    setValue={setEmail}
                     onEnter={() => {}}
                 />
                 <HStack h={4} />
                 <TextField
+                    type="password"
                     w="100%"
-                    value=""
+                    value={password}
                     hint="비밀번호 입력"
-                    setValue={() => {}}
+                    setValue={setPassword}
                     onEnter={() => {}}
                 />
                 <TextField
+                    type="password"
                     w="100%"
-                    value=""
+                    value={passwordConfirm}
                     hint="비밀번호 확인"
-                    setValue={() => {}}
+                    setValue={setPasswordConfirm}
                     onEnter={() => {}}
                 />
                 <HStack flex={1} />
-                <Button w="100%" label="완료" onClick={() => {}}/>
+                <Button w="100%" label="완료" onClick={() => {
+                    http.post('/register', {
+                        email,
+                        name: "",
+                        password
+                    })
+                    navigate('/')
+                }}/>
             </VStack>
         </VStack>
     )

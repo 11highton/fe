@@ -29,3 +29,4 @@ export const postRes = z.object({
 })
 
 export type Content = z.infer<typeof Content>
+export type Post = z.infer<typeof postRes>

@@ -7,6 +7,7 @@ import Post from './ui/pages/Post'
 import Login from './ui/pages/Login'
 import Signup from './ui/pages/Signup'
 import Splash from './ui/pages/Splash'
+import Search from './ui/pages/Search'
 
 const Router = () => {
   return (
@@ -18,6 +19,7 @@ const Router = () => {
         <Route path='/signup' element={<Signup />} />
         <Route path='/chat' element={<Chat />} />
         <Route path='/post/:id' element={<Post />} />
+        <Route path='/search' element={<Search />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

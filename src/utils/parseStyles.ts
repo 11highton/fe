@@ -67,7 +67,7 @@ export const parsePosition = (props: PositionProps): SerializedStyles => css({
       : props.pos === "stk" ? "sticky"
       : undefined,
     top: wrap(props.t),
-    right: wrap(props.r),
+    right: wrap(props.rr),
     bottom: wrap(props.b),
     left: wrap(props.l),
     zIndex: props.zIdx,

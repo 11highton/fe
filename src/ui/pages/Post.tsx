@@ -1,6 +1,7 @@
 import { useTheme } from "@emotion/react";
 import { useParams } from "react-router-dom";
 import { use, useCallback, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 import HStack from "../components/core/HStack"
 import VStack from "../components/core/VStack"
@@ -12,6 +13,7 @@ import { useAudio } from "../../hooks/useAudio";
 import { AnimatePresence } from "framer-motion";
 
 const Post = () => {
+    const navigate = useNavigate()
     const { id } = useParams();
     const {
         audioRef,
@@ -54,7 +56,7 @@ const Post = () => {
             <audio ref={audioRef} style={{ display: 'none' }}></audio>
             <VStack initial={{ scale: 0.8 }} animate={{ scale: 1 }} exit={{ scale: 0.8 }} transition={{ stiffness: 400 }} w="100%" h="100%" maxw="480px" bgColor={theme.colors.bgWeak}>
                 <HStack w="100%" pv={14} ph={20} gap={6} align="cl">
-                    <HStack p={4} onClick={() => {}} cursor="pointer">
+                    <HStack p={4} onClick={() => {navigate(-1)}} cursor="pointer">
                         <Icon name="back" size={24} colors={[theme.colors.ctRegular]} />
                     </HStack>
                     <VStack initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ stiffness: 400 }} flex={1} gap={6}>

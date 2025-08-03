@@ -12,3 +12,14 @@ export const loginRes = z.object({
     accessToken: z.string(),
     refreshToken: z.string()
 })
+
+export const meRes = z.object({
+    id: z.string(),
+    name: z.string(),
+    email: z.string().email(),
+    roles: z.array(z.string()),
+    iat: z.number(),
+    exp: z.number()
+})
+
+export type Me = z.infer<typeof meRes>
