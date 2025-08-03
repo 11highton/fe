@@ -14,16 +14,6 @@ const Home = () => {
 
     return (
         <VStack w="100%" h="100%" align="c" bgColor={theme.colors.bgWeak}>
-            <Button
-                label="Login"
-                variant="fill"
-                onClick={() => {
-                    const res = http.post("/login", {
-                        email: "test@example.com",
-                        password: "aZ019!@#$"
-                    }, loginRes)
-                }}
-            />
         </VStack>
     )
 }

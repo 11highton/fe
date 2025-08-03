@@ -1,39 +1,30 @@
-import React from "react"
 import { useTheme } from "@emotion/react"
 
 import HStack from "../core/HStack"
 import Text from "../core/Text"
 
 interface ButtonProps {
-    label: string,
-    icon?: React.ReactNode,
-    variant?: "fill" | "outline" | "disabled",
-    onClick: () => void
+    w?: string;
+    h?: string;
+    label: string;
+    onClick: () => void;
 }
 
-const Button = ({label, icon, variant = "fill", onClick}: ButtonProps) => {
+const Button = ({w, h, label, onClick}: ButtonProps) => {
     const theme = useTheme()
 
     return (
         <HStack
+            w={w}
+            h={h}
             p={14}
-            gap={6}
             r={10}
-            bgColor={
-                variant === "fill" ? theme.colors.primary
-                : variant === "outline" ? theme.colors.bgWeak
-                : theme.colors.bgRegular }
-            olColor={
-                variant === "outline" ? theme.colors.outline
-                : undefined }
+            align="c"
+            bgColor={theme.colors.primary}
             onClick={onClick}
             cursor="pointer"
         >
-            {icon}
-            <Text value={label} font={theme.fonts.ms} color={
-                variant === "fill" ? theme.colors.ctElevated
-                : variant === "outline" ? theme.colors.ctStrong
-                : theme.colors.ctWeak }/>
+            <Text value={label} font={theme.fonts.mm} color={theme.colors.ctElevated}/>
         </HStack>
     )
 }
