@@ -27,6 +27,7 @@ export const postRes = z.object({
     categories: z.array(Category),
     createdAt: z.string(),
 })
+export const postListRes = z.array(postRes)
 
 export type Content = z.infer<typeof Content>
 export type Post = z.infer<typeof postRes>

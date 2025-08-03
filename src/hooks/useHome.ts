@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import HttpService from "./useHttp";
-import { postRes, type Post } from "../schemas/post";
+import { postListRes, type Post } from "../schemas/post";
 import { meRes } from "../schemas/auth";
 import type { Me } from "../schemas/auth";
 
@@ -14,7 +14,7 @@ const useHome = () => {
         if(data) setMe(data)
     }
     const getPosts = async () => {
-        const { data } = await http.get(`/posts/user/${me?.id}`, postRes)
+        const { data } = await http.get(`/posts/user/${me?.id}`, postListRes)
         if(data) setPosts(data)
     }
 
